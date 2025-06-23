@@ -1,0 +1,20 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller
+*.spec
+dist/
+build/
+*.exe
+
+# Card image assets (if included separately)
+cards/*.png
+
+# Local configuration
+window_config.json
+
+# OS files
+.DS_Store
+Thumbs.db
