@@ -3,7 +3,9 @@ import random
 import json
 import os
 import sys
-from tkinter import PhotoImage
+from PIL import Image, ImageTk
+
+CARD_SCALE = 0.5  # 50% size; adjust as needed
 
 CONFIG_FILE = "window_config.json"
 
@@ -35,11 +37,20 @@ def get_resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-def load_card_image(rank, suit):
+def load_scaled_card_image(rank, suit):
+    # Map suits from symbols to letters
     suit_map = {'♥': 'H', '♦': 'D', '♣': 'C', '♠': 'S'}
-    filename = f"{rank}{suit_map[suit]}.png"
+    if rank == 'back':
+        filename = "back.png"
+    else:
+        filename = f"{rank}{suit_map[suit]}.png"
     path = get_resource_path(os.path.join("cards", filename))
-    return PhotoImage(file=path)
+
+    # Load and scale image with Pillow
+    image = Image.open(path)
+    w, h = image.size
+    image = image.resize((int(w * CARD_SCALE), int(h * CARD_SCALE)), Image.Resampling.LANCZOS)
+    return ImageTk.PhotoImage(image)
 
 def create_deck():
     ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -120,10 +131,7 @@ class BlackjackApp:
         self.dealer_card_images = []
         cards = self.dealer_hand if reveal_dealer else [self.dealer_hand[0], ('back', 'back')]
         for rank, suit in cards:
-            if rank == 'back':
-                img = PhotoImage(file=get_resource_path('cards/back.png'))
-            else:
-                img = load_card_image(rank, suit)
+            img = load_scaled_card_image(rank, suit)
             self.dealer_card_images.append(img)
             lbl = tk.Label(self.dealer_cards_lbl, image=img)
             lbl.pack(side='left', padx=5)
@@ -132,7 +140,7 @@ class BlackjackApp:
             widget.destroy()
         self.player_card_images = []
         for rank, suit in self.player_hand:
-            img = load_card_image(rank, suit)
+            img = load_scaled_card_image(rank, suit)
             self.player_card_images.append(img)
             lbl = tk.Label(self.player_cards_lbl, image=img)
             lbl.pack(side='left', padx=5)
